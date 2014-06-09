@@ -1,0 +1,26 @@
+Journey into OpenSSL. Network Security course exercise.
+===
+
+C Programming - client.c
+First I create a socket using the standard socket API and then I initialize the OpenSSL library with SSL_load_error_strings() and SSL_library_init.
+This loads data such as ciphersuites to memory. Then I create new SSL context with SSL_CTX_NEW and specify it to use TLSv1. After that
+I install the callback verify_callback and create a BIO (basic input output) object. I set SSL to use this object and also bind it to the socket I created earlier.
+Finally, I call SSL_connect and this starts the handshake/hello process. Then I craft a request and send it with SSL_write and finally I read the socket with SSL_read.
+
+My verify_callback first fetches the CN, O and OU data for issuer and subject. Then I check the error codes and print the corresponding answers.
+I also copy the common name into a global static string. I compare this to hostname before sending my request. Finding out how to get all this CN/O/OU
+data from the cert was the hardest part in this exercise since the OpenSSL document is kind of substandard.
+My solution implements all functionality specified in the report except it doesn't print clear text for all the 50+ error codes defined
+in /usr/include/openssl/x509_vfy.h since I deemed that unnecessary.
+
+
+Python Programming - ssl.py - requires python OpenSSL bindings (python-openssl in ubuntu repos)
+I import the SSL-library and create an SSL context with SSL.Context(SSL.TLSv1_METHOD). Then I set the verify callback with set_verify.
+Then I set the root certificate load locations and create an SSL.Connection object. I call connect() to this object I created.
+Finally I send data with send() and receive with recv().
+
+Callback checks the error codes (obtainable from /usr/include/openssl/x509_vfy.h) and displays the error in text form.
+It also checks that Common Name matches the hostname for the final cert in the chain.
+
+Conclusion: OpenSSL API is horrible.
+Code for demonstration purposes only.
